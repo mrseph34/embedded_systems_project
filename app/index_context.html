@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatGPT Input</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #responseGrid {
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            gap: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+        .response {
+            padding: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+        .message, .response-text {
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <h1>Enter a message for AIs:</h1>
+    <form onsubmit="handleSubmit(event)">
+        <input type="text" id="message" placeholder="Type your message" required><br>
+        
+        <!-- Optional image input -->
+        <label for="image">Select an image (optional):</label>
+        <input type="file" id="image" accept="image/*"><br>
+
+        <!-- Context input field -->
+        <label for="context">Additional context (optional):</label>
+        <input type="text" id="context" placeholder="e.g., location: New York"><br>
+
+        <button type="submit">Send</button>
+    </form>
+
+    <div id="responseGrid"></div>
+
+    <script>
+        async function handleSubmit(event) {
+            event.preventDefault();
+            const message = document.getElementById('message').value;
+            const context = document.getElementById('context').value;
+            const image = document.getElementById('image').files[0]?.name || null;
+            
+            addResponseToGrid(message, "");
+
+            const formData = new FormData();
+            formData.append('message', message);
+            formData.append('context', context);
+            formData.append('image', image);
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify( { message , context , image } )
+                });
+
+                if (response.ok && response.body) {
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder("utf-8");
+
+                    let done = false;
+                    let responseText = '';
+
+                    while (!done) {
+                        const { value, done: streamDone } = await reader.read();
+                        done = streamDone;
+
+                        // Decode and accumulate chunked response text
+                        responseText += decoder.decode(value || new Uint8Array, { stream: !done });
+                        updateResponse(responseText); // Update UI gradually
+                    }
+                } else {
+                    console.error('Error:', response.statusText);
+                    updateResponse('Error: ' + response.statusText);
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
+                updateResponse('Fetch error: ' + error.message);
+            }
+        }
+
+        function addResponseToGrid(message, response) {
+            const grid = document.getElementById('responseGrid');
+
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            messageDiv.textContent = message;
+
+            const responseDiv = document.createElement('div');
+            responseDiv.classList.add('response-text');
+            responseDiv.textContent = response;
+
+            grid.appendChild(messageDiv);
+            grid.appendChild(responseDiv);
+        }
+
+        function updateResponse(text) {
+            const grid = document.getElementById('responseGrid');
+            const lastResponseDiv = grid.lastChild;
+            lastResponseDiv.textContent = text;
+        }
+    </script>
+</body>
+</html>

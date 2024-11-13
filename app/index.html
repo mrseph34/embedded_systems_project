@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatGPT Input</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #responseGrid {
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            gap: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+        .response {
+            padding: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+        .message, .response-text {
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <h1>Enter a message for ChatGPT:</h1>
+    <form onsubmit="handleSubmit(event)">
+        <input type="text" id="message" placeholder="Type your message" required>
+        <button type="submit">Send</button>
+    </form>
+
+    <div id="responseGrid"></div>
+
+    <script>
+        async function handleSubmit(event) {
+            event.preventDefault();
+            const message = document.getElementById('message').value;
+            addResponseToGrid(message, "");
+
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message })
+            });
+
+            if (response.ok) {
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder("utf-8");
+                let result = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    result += decoder.decode(value, { stream: true });
+                    updateResponse(result);
+                }
+            } else {
+                console.error('Error:', response.statusText);
+            }
+        }
+
+        function addResponseToGrid(message, response) {
+            const grid = document.getElementById('responseGrid');
+
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            messageDiv.textContent = message;
+
+            const responseDiv = document.createElement('div');
+            responseDiv.classList.add('response-text');
+            responseDiv.textContent = response;
+
+            grid.appendChild(messageDiv);
+            grid.appendChild(responseDiv);
+        }
+
+        function updateResponse(text) {
+            const grid = document.getElementById('responseGrid');
+            const lastResponseDiv = grid.lastChild; // Get the last response div
+            lastResponseDiv.textContent = text; // Update the last response div with new content
+        }
+    </script>
+</body>
+</html>
