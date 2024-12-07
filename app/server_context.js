@@ -37,26 +37,26 @@ app.post('/chat', async (req, res) => {
         }
     ];
 
-    // Check if context is provided and format it
-    if (context) {
-        // Split by commas to handle multiple key-value pairs
-        const contextPairs = context.split(',').map(pair => pair.trim());
-        const contextMessage = contextPairs.map(pair => {
-            const contextParts = pair.split(':').map(part => part.trim());
-            if (contextParts.length === 2) {
-                return `${contextParts[0]}: ${contextParts[1]}`; // Format as "key: value"
-            }
-            return '';
-        }).join(', ');
+    // // Check if context is provided and format it
+    // if (context) {
+    //     // Split by commas to handle multiple key-value pairs
+    //     const contextPairs = context.split(',').map(pair => pair.trim());
+    //     const contextMessage = contextPairs.map(pair => {
+    //         const contextParts = pair.split(':').map(part => part.trim());
+    //         if (contextParts.length === 2) {
+    //             return `${contextParts[0]}: ${contextParts[1]}`; // Format as "key: value"
+    //         }
+    //         return '';
+    //     }).join(', ');
 
-        // Add context to the assistant role
-        messages.push({
-            role: "assistant",
-            content: [
-                { type: "text", text: "This is the CONTEXT for this situation--> " + contextMessage } // Combine all context into a single message
-            ]
-        });
-    }
+    //     // Add context to the assistant role
+    //     messages.push({
+    //         role: "assistant",
+    //         content: [
+    //             { type: "text", text: "This is the CONTEXT for this situation--> " + contextMessage } // Combine all context into a single message
+    //         ]
+    //     });
+    // }
 
     // If an imageInput is provided, convert it to Base64 and add it to the context
     if (image) {
@@ -74,21 +74,21 @@ app.post('/chat', async (req, res) => {
         }
     }
 
-    // Include the message history in the system role
-    messages.unshift({
-        role: "system",
-        content: messageHistory.map(msg => ({ type: "text", text: "This is the history for this conversation (use it as such): " + msg })) // Map history to content
-    });
+    // // Include the message history in the system role
+    // messages.unshift({
+    //     role: "system",
+    //     content: messageHistory.map(msg => ({ type: "text", text: "This is the history for this conversation (use it as such): " + msg })) // Map history to content
+    // });
 
-    // Add the current message to history
-    messageHistory.push(message);
+    // // Add the current message to history
+    // messageHistory.push(message);
 
     try {
         const responseStream = await axios.post(LM_STUDIO_URL, {
             model: "xtuner/llava-phi-3-mini-gguf",
             messages,
             temperature: 0,
-            max_tokens: 1000,
+            max_tokens: 6000,
             stream: true
         }, { responseType: 'stream' });
 

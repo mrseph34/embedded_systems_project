@@ -3,110 +3,234 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatGPT Input</title>
+    <title>AI Input</title>
     <style>
+        :root {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --primary-color: #bb86fc;
+            --secondary-color: #03dac6;
+            --error-color: #cf6679;
+            --input-bg: #1e1e1e;
+            --border-color: #333;
+        }
+ 
         body {
+            margin: 0;
             font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
         }
-        #responseGrid {
-            display: grid;
-            grid-template-columns: 1fr 3fr;
-            gap: 10px;
-            max-height: 200px;
-            overflow-y: auto;
-            border: 1px solid #ccc;
+ 
+        h1 {
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+ 
+        .container {
+            display: flex;
+            width: 100%;
+            max-width: 1000px;
+            gap: 20px;
+        }
+ 
+        .form-container, .tuning-container {
+            background-color: var(--input-bg);
+            padding: 20px;
+            border-radius: 5px;
+            flex: 1;
+            border: 1px solid var(--border-color);
+        }
+ 
+        .form-container {
+            flex: 2;
+        }
+ 
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+ 
+        input[type="text"], input[type="file"], button {
+            font-size: 16px;
             padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            background-color: var(--input-bg);
+            color: var(--text-color);
         }
-        .response {
-            padding: 5px;
-            border-bottom: 1px solid #ddd;
+ 
+        button {
+            background-color: var(--primary-color);
+            color: var(--bg-color);
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
         }
+ 
+        button:hover {
+            background-color: var(--secondary-color);
+        }
+ 
+        #responseGrid {
+            margin-top: 20px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            padding: 10px;
+            background-color: var(--input-bg);
+        }
+ 
         .message, .response-text {
+            padding: 10px;
+            border-radius: 5px;
             word-wrap: break-word;
+        }
+ 
+        .message {
+            background-color: var(--primary-color);
+            color: var(--bg-color);
+        }
+ 
+        .response-text {
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+        }
+ 
+        .tuning-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+ 
+        .tuning-container label {
+            font-weight: bold;
+        }
+ 
+        .tuning-container input[type="number"], .tuning-container textarea {
+            width: 100%;
+            font-size: 14px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+            background-color: var(--input-bg);
+            color: var(--text-color);
+        }
+ 
+        textarea {
+            resize: vertical;
+        }
+ 
+        @media (max-width: 600px) {
+            .container {
+                flex-direction: column;
+            }
+ 
+            #responseGrid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
     <h1>Enter a message for AIs:</h1>
-    <form onsubmit="handleSubmit(event)">
-        <input type="text" id="message" placeholder="Type your message" required><br>
-        
-        <!-- Optional image input -->
-        <label for="image">Select an image (optional):</label>
-        <input type="file" id="image" accept="image/*"><br>
-
-        <!-- Context input field -->
-        <label for="context">Additional context (optional):</label>
-        <input type="text" id="context" placeholder="e.g., location: New York"><br>
-
-        <button type="submit">Send</button>
-    </form>
-
-    <div id="responseGrid"></div>
-
+    <div class="container">
+        <!-- Tuning Section -->
+        <div class="tuning-container">
+            <h2>Hyperparameter Tuning</h2>
+            <label for="temperature">Temperature:</label>
+            <input type="number" id="temperature" placeholder="e.g., 0.7" min="0" max="1" step="0.1">
+ 
+            <label for="top-p">Top-P:</label>
+            <input type="number" id="top-p" placeholder="e.g., 0.9" min="0" max="1" step="0.1">
+ 
+            <label for="frequency-penalty">Frequency Penalty:</label>
+            <input type="number" id="frequency-penalty" placeholder="e.g., 0.5" min="0" max="2" step="0.1">
+ 
+            <label for="presence-penalty">Presence Penalty:</label>
+            <input type="number" id="presence-penalty" placeholder="e.g., 0.0" min="0" max="2" step="0.1">
+ 
+            <label for="custom-context">Custom Context:</label>
+            <textarea id="custom-context" rows="4" placeholder="Add additional context for AI"></textarea>
+        </div>
+ 
+        <!-- Form Section -->
+        <div class="form-container">
+            <form onsubmit="handleSubmit(event)">
+                <input type="text" id="message" placeholder="Type your message" required>
+                <label for="image">Select an image (optional):</label>
+                <input type="file" id="image" accept="image/*">
+                <label for="context">Additional context (optional):</label>
+                <input type="text" id="context" placeholder="e.g., location: New York">
+                <button type="submit">Send</button>
+            </form>
+            <div id="responseGrid"></div>
+        </div>
+    </div>
+ 
     <script>
         async function handleSubmit(event) {
             event.preventDefault();
             const message = document.getElementById('message').value;
             const context = document.getElementById('context').value;
             const image = document.getElementById('image').files[0]?.name || null;
-            
-            addResponseToGrid(message, "");
-
-            const formData = new FormData();
-            formData.append('message', message);
-            formData.append('context', context);
-            formData.append('image', image);
-
+ 
+            addResponseToGrid(message, "Processing...");
+ 
+            const formData = { message, context, image };
+ 
             try {
                 const response = await fetch('/chat', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify( { message , context , image } )
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
                 });
-
-                if (response.ok && response.body) {
+ 
+                if (response.ok) {
                     const reader = response.body.getReader();
                     const decoder = new TextDecoder("utf-8");
-
-                    let done = false;
-                    let responseText = '';
-
-                    while (!done) {
-                        const { value, done: streamDone } = await reader.read();
-                        done = streamDone;
-
-                        // Decode and accumulate chunked response text
-                        responseText += decoder.decode(value || new Uint8Array, { stream: !done });
-                        updateResponse(responseText); // Update UI gradually
+                    let responseText = "";
+ 
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        if (done) break;
+ 
+                        responseText += decoder.decode(value, { stream: true });
+                        updateResponse(responseText);
                     }
                 } else {
-                    console.error('Error:', response.statusText);
-                    updateResponse('Error: ' + response.statusText);
+                    updateResponse(`Error: ${response.statusText}`);
                 }
             } catch (error) {
-                console.error('Fetch error:', error);
-                updateResponse('Fetch error: ' + error.message);
+                updateResponse(`Fetch error: ${error.message}`);
             }
         }
-
+ 
         function addResponseToGrid(message, response) {
             const grid = document.getElementById('responseGrid');
-
+ 
             const messageDiv = document.createElement('div');
             messageDiv.classList.add('message');
             messageDiv.textContent = message;
-
+ 
             const responseDiv = document.createElement('div');
             responseDiv.classList.add('response-text');
             responseDiv.textContent = response;
-
+ 
             grid.appendChild(messageDiv);
             grid.appendChild(responseDiv);
         }
-
+ 
         function updateResponse(text) {
             const grid = document.getElementById('responseGrid');
             const lastResponseDiv = grid.lastChild;
